@@ -1,0 +1,90 @@
+classdef VigenereDNA
+    properties
+        AminoAcidTable
+    end
+
+    methods
+        function obj = VigenereDNA()
+            obj.AminoAcidTable = struct( ...
+                'A', {'GCT', 'GCC', 'GCA', 'GCG'}, ...
+                'R', {'CGT', 'CGC', 'CGA', 'CGG', 'AGA', 'AGG'}, ...
+                % ... include other amino acids
+                'Z', {'TAA', 'TGA', 'TAG'} ...
+            );
+        end
+
+        function binaryMsg = textToBinary(obj, msg)
+            while mod(length(msg), 3) ~= 0
+                msg = [msg 'X'];
+            end
+            binaryMsg = '';
+            for i = 1:length(msg)
+                binaryMsg = [binaryMsg dec2bin(msg(i), 8)];
+            end
+        end
+
+        % ... other methods including binary to text, binary to DNA,
+        % DNA to binary, DNA to amino acid, amino acid to DNA,
+        % Vigenère encryption and decryption, and encrypt/decrypt methods
+
+    end
+end
+
+% Usage
+vdna = VigenereDNA();
+cipherText = vdna.encrypt('AmiNe23', 'aB');
+vdna.decrypt(cipherText, 'aB');
+
+% ... previous class definition continues
+
+        function aminoacidMsg = dnaToAminoAcid(obj, msg)
+            aminoacidMsg = '';
+            for i = 1:3:length(msg)
+                dnaCodons = msg(i:i+2);
+                keys = fieldnames(obj.AminoAcidTable);
+                for k = 1:length(keys)
+                    key = keys{k};
+                    if any(strcmp(obj.AminoAcidTable.(key), dnaCodons))
+                        index = find(strcmp(obj.AminoAcidTable.(key), dnaCodons));
+                        aminoacidMsg = [aminoacidMsg key char(index + 'A' - 1)];
+                        break;
+                    end
+                end
+            end
+        end
+
+        function dnaMsg = aminoAcidToDNA(obj, msg)
+            dnaMsg = '';
+            for i = 1:2:length(msg)
+                aminoAcid = msg(i);
+                index = msg(i+1) - 'A' + 1;
+                dnaMsg = [dnaMsg obj.AminoAcidTable.(aminoAcid){index}];
+            end
+        end
+
+        function encryptedMsg = vigenereEncryption(obj, msg, key)
+            encryptedMsg = '';
+            key = upper(key);
+            for i = 1:length(msg)
+                encryptedMsg = [encryptedMsg char(mod(double(msg(i)) + double(key(mod(i-1, length(key)) + 1)) - 2*'A', 26) + 'A')];
+            end
+        end
+
+        function decryptedMsg = vigenereDecryption(obj, msg, key)
+            decryptedMsg = '';
+            key = upper(key);
+            for i = 1:length(msg)
+                decryptedMsg = [decryptedMsg char(mod(double(msg(i)) - double(key(mod(i-1, length(key)) + 1)) + 26, 26) + 'A')];
+            end
+        end
+
+        function encryptedMsg = encrypt(obj, msg, key)
+            encryptedMsg = obj.textToBinary(msg);
+            encryptedMsg = obj.binaryToDNA(encryptedMsg);
+            encryptedMsg = obj.dnaToAminoAcid(encryptedMsg);
+            encryptedMsg = obj.vigenereEncryption(encryptedMsg, key);
+        end
+
+        function decryptedMsg = decrypt(obj, msg, key)
+            decryptedMsg = obj.vigenereDecryption
+
