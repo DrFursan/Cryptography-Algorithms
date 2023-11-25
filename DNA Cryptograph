@@ -1,0 +1,83 @@
+class VigenereDNA:
+    def __init__(self):
+        self.amino_acid_table = {
+            "A": ["GCT", "GCC", "GCA", "GCG"],
+            "R": ["CGT", "CGC", "CGA", "CGG", "AGA", "AGG"],
+            # ... include other amino acids
+            "Z": ["TAA", "TGA", "TAG"]
+        }
+
+    def text_to_binary(self, msg):
+        while len(msg) % 3 != 0:
+            msg += "X"
+        return ''.join(f'{ord(c):08b}' for c in msg)
+
+    def binary_to_text(self, msg):
+        return ''.join(chr(int(msg[i:i+8], 2)) for i in range(0, len(msg), 8))
+
+    def binary_to_dna(self, msg):
+        dna_conversion = {"00": "A", "01": "C", "10": "G", "11": "T"}
+        return ''.join(dna_conversion[msg[i:i+2]] for i in range(0, len(msg), 2))
+
+    def dna_to_binary(self, msg):
+        binary_conversion = {'A': "00", 'C': "01", 'G': "10", 'T': "11"}
+        return ''.join(binary_conversion[base] for base in msg)
+
+    # ... other methods including DNA to amino acid, amino acid to DNA,
+    # Vigenère encryption and decryption, and encrypt/decrypt methods
+
+    def main(self):
+        ciphertext = self.encrypt("AmiNe23", "aB")
+        self.decrypt(ciphertext, "aB")
+
+# Instantiate and run
+vdna = VigenereDNA()
+vdna.main()
+# ... previous class definition continues
+
+    def dna_to_amino_acid(self, msg):
+        amino_acid_msg = ""
+        for i in range(0, len(msg), 3):
+            dna_codons = msg[i:i+3]
+            for key, values in self.amino_acid_table.items():
+                if dna_codons in values:
+                    amino_acid_msg += key + chr(values.index(dna_codons) + ord('A'))
+                    break
+        return amino_acid_msg
+
+    def amino_acid_to_dna(self, msg):
+        dna_msg = ""
+        for i in range(0, len(msg), 2):
+            dna_msg += self.amino_acid_table[msg[i]][ord(msg[i+1]) - ord('A')]
+        return dna_msg
+
+    def vigenere_encryption(self, msg, key):
+        encrypted_msg = ""
+        key = key.upper()
+        for i in range(len(msg)):
+            encrypted_msg += chr(((ord(msg[i]) + ord(key[i % len(key)])) % 26) + ord('A'))
+        return encrypted_msg
+
+    def vigenere_decryption(self, msg, key):
+        decrypted_msg = ""
+        key = key.upper()
+        for i in range(len(msg)):
+            decrypted_msg += chr(((ord(msg[i]) - ord(key[i % len(key)]) + 26) % 26) + ord('A'))
+        return decrypted_msg
+
+    def encrypt(self, msg, key):
+        encrypted_msg = self.text_to_binary(msg)
+        encrypted_msg = self.binary_to_dna(encrypted_msg)
+        encrypted_msg = self.dna_to_amino_acid(encrypted_msg)
+        encrypted_msg = self.vigenere_encryption(encrypted_msg, key)
+        return encrypted_msg
+
+    def decrypt(self, msg, key):
+        decrypted_msg = self.vigenere_decryption(msg, key)
+        decrypted_msg = self.amino_acid_to_dna(decrypted_msg)
+        decrypted_msg = self.dna_to_binary(decrypted_msg)
+        decrypted_msg = self.binary_to_text(decrypted_msg)
+        return decrypted_msg
+
+
+
